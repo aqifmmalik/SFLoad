@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Salesforce UI Login Test" enabled="true">
+      <stringProp name="TestPlan.comments">Salesforce Login Test using WebDriver Sampler</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Salesforce Login Users" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <ChromeConfig guiclass="ChromeConfigGui" testclass="ChromeConfig" testname="jp@gc - Chrome Driver Config" enabled="true">
+          <stringProp name="WebDriverConfig.chromedriver_path"></stringProp>
+          <boolProp name="WebDriverConfig.chrome_headless">false</boolProp>
+          <stringProp name="WebDriverConfig.proxy_type">NO_PROXY</stringProp>
+          <stringProp name="WebDriverConfig.proxy_host"></stringProp>
+          <stringProp name="WebDriverConfig.proxy_port"></stringProp>
+          <stringProp name="WebDriverConfig.proxy_user"></stringProp>
+          <stringProp name="WebDriverConfig.proxy_pass"></stringProp>
+          <stringProp name="WebDriverConfig.acceptinsecurecerts">false</stringProp>
+          <stringProp name="WebDriverConfig.capabilities"></stringProp>
+          <stringProp name="WebDriverConfig.chrome_additional_options">
+            --remote-allow-origins=*
+          </stringProp>
+          <stringProp name="WebDriverConfig.binary_path"></stringProp>
+          <boolProp name="WebDriverConfig.webdrivermanager_autoinstall">true</boolProp>
+        </ChromeConfig>
+        <hashTree/>
+        <WebDriverSampler guiclass="WebDriverSamplerGui" testclass="WebDriverSampler" testname="Salesforce Login Flow" enabled="true">
+          <stringProp name="WebDriverSampler.script">
+            // Import necessary Selenium classes
+            import org.openqa.selenium.By
+            import org.openqa.selenium.support.ui.WebDriverWait
+            import org.openqa.selenium.support.ui.ExpectedConditions
+            import org.openqa.selenium.Dimension // For setting window size
+            import java.time.Duration // For WebDriverWait timeout
+
+            // --- Configuration Variables ---
+            def baseUrl = "https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/"
+            def username = "testuser@vnshealthhub.org.fullsbx"
+            def password = "testpassword"
+            // XPath for post-login verification on Lightning homepage
+            def postLoginElementXPath = "//*[@id=\"oneHeader\"]/div[2]/div[2]/div/button" 
+            def timeoutSeconds = 30 // Max wait time for elements (adjust if network is slow)
+
+            // Window size for "80% zoom" effect (80% of 1920x1080)
+            def windowWidth = 1536
+            def windowHeight = 864
+
+            log.info("Starting Salesforce Login Script for user: ${username}")
+
+            try {
+                // 1. Navigate to Salesforce Login URL
+                log.info("Navigating to URL: ${baseUrl}")
+                WDS.sampleResult.sampleStart() // Start measuring overall login time
+                WDS.browser.get(baseUrl)
+                
+                // Set browser window size
+                WDS.browser.manage().window().setSize(new Dimension(windowWidth, windowHeight))
+                log.info("Browser window set to size: ${windowWidth}x${windowHeight}")
+
+                // Initialize WebDriverWait for explicit waits
+                def wait = new WebDriverWait(WDS.browser, Duration.ofSeconds(timeoutSeconds))
+
+                // 2. Enter Username
+                log.info("Waiting for username field (ID: username)...")
+                def usernameField = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("username")))
+                usernameField.sendKeys(username)
+                log.info("Username entered.")
+
+                // 3. Enter Password
+                log.info("Waiting for password field (ID: password)...")
+                def passwordField = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("password")))
+                passwordField.sendKeys(password)
+                log.info("Password entered.")
+
+                // 4. Click Login Button
+                log.info("Waiting for login button (ID: Login) to be clickable...")
+                def loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("Login")))
+                loginButton.click()
+                log.info("Login button clicked. Waiting for next page...")
+
+                // 5. Post-Login Verification (Wait for element on the Lightning homepage)
+                log.info("Waiting for post-login verification element (XPath: ${postLoginElementXPath})...")
+                def postLoginElement = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(postLoginElementXPath)))
+                
+                // Check if element is displayed and enabled
+                if (postLoginElement.isDisplayed() && postLoginElement.isEnabled()) {
+                    log.info("Successfully landed on Lightning homepage (verification element found and interactive).")
+                    WDS.sampleResult.setResponseMessage("Login Successful")
+                    WDS.sampleResult.setResponseCode("200")
+                    WDS.sampleResult.setSuccessful(true)
+                } else {
+                    throw new Exception("Post-login element found but not interactive.")
+                }
+
+            } catch (Exception e) {
+                log.error("Salesforce Login Failed: " + e.getMessage(), e) // Log exception stack trace
+                WDS.sampleResult.setResponseMessage("Login Failed: " + e.getMessage())
+                WDS.sampleResult.setResponseCode("500")
+                WDS.sampleResult.setSuccessful(false)
+            } finally {
+                WDS.sampleResult.sampleEnd() // End measuring overall login time
+                log.info("Salesforce Login Script Finished for user: ${username}")
+            }
+          </stringProp>
+        </WebDriverSampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsTreeGui" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <v>true</v>
+              <default_encoding></default_encoding>
+              <url>true</url>
+              <fileName>false</fileName>
+              <hostname>true</hostname>
+              <port>true</port>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+</jmeterTestPlan>
