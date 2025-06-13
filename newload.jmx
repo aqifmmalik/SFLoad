@@ -98,7 +98,7 @@
                 log.info("Login button clicked. Waiting for next page...")
 
                 // 5. Post-Login Verification (Wait for element on the Lightning homepage)
-                log.info("Waiting for post-login verification element (XPath: ${postLoginElementXPath})...")
+                log.info("Waiting for post-login verification element (XPath: ${postLoginElementXPath}).")
                 def postLoginElement = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(postLoginElementXPath)))
                 
                 // Check if element is displayed and enabled
