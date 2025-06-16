@@ -1,6 +1,55 @@
-// FINAL ROBUST SCRIPT - Correctly uses JavaScript clicks to bypass ALL UI interception issues.
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Salesforce Timed Filter Test (FINAL)">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Salesforce User">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig guiclass="com.googlecode.jmeter.plugins.webdriver.config.gui.ChromeDriverConfigGui" testclass="com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig" testname="jp@gc - Chrome Driver Config">
+          <boolProp name="WebDriverConfig.acceptinsecurecerts">false</boolProp>
+          <boolProp name="WebDriverConfig.reset_per_iteration">false</boolProp>
+          <stringProp name="WebDriverConfig.driver_path">C:\JMeter\chromedriver.exe</stringProp>
+          <boolProp name="WebDriverConfig.dev_mode">false</boolProp>
+          <boolProp name="WebDriverConfig.headless">false</boolProp>
+          <boolProp name="WebDriverConfig.maximize_browser">true</boolProp>
+          <stringProp name="ChromeDriverConfig.additional_args"></stringProp>
+          <stringProp name="ChromeDriverConfig.binary_path"></stringProp>
+          <stringProp name="WebDriverConfig.proxy_type">SYSTEM</stringProp>
+          <stringProp name="WebDriverConfig.proxy_pac_url"></stringProp>
+          <stringProp name="WebDriverConfig.http_host"></stringProp>
+          <intProp name="WebDriverConfig.http_port">0</intProp>
+          <boolProp name="WebDriverConfig.use_http_for_all_protocols">true</boolProp>
+          <stringProp name="WebDriverConfig.https_host"></stringProp>
+          <intProp name="WebDriverConfig.https_port">0</intProp>
+          <boolProp name="WebDriverConfig.use_ftp_proxy">true</boolProp>
+          <stringProp name="WebDriverConfig.ftp_host"></stringProp>
+          <intProp name="WebDriverConfig.ftp_port">0</intProp>
+          <boolProp name="WebDriverConfig.use_socks_proxy">true</boolProp>
+          <stringProp name="WebDriverConfig.socks_host"></stringProp>
+          <intProp name="WebDriverConfig.socks_port">0</intProp>
+          <stringProp name="WebDriverConfig.no_proxy"></stringProp>
+          <stringProp name="WebDriverConfig.custom_capabilites"></stringProp>
+        </com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig>
+        <hashTree/>
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="SalesForce Load" enabled="false">
+          <stringProp name="WebDriverSampler.script">// FINAL ROBUST SCRIPT - Correctly uses JavaScript clicks to bypass ALL UI interception issues.
 
-WDS.log.info("Starting Salesforce Test Sampler")
+WDS.log.info(&quot;Starting Salesforce Test Sampler&quot;)
 
 // Import necessary classes
 import org.openqa.selenium.By
@@ -16,62 +65,189 @@ JavascriptExecutor js = (JavascriptExecutor) WDS.browser
 
 try {
     // --- Step 1: Navigate and Login ---
-    WDS.browser.get("https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/")
-    WDS.log.info("Navigated to Salesforce URL.")
+    WDS.browser.get(&quot;https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/&quot;)
+    WDS.log.info(&quot;Navigated to Salesforce URL.&quot;)
     
-    def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")))
-    usernameField.sendKeys("aqif_m_con@vnshealthhub.org.fullsbx")
-    WDS.browser.findElement(By.id("password")).sendKeys("VNSHealth@1")
-    WDS.browser.findElement(By.id("Login")).click()
-    WDS.log.info("Login form submitted.")
+    def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(&quot;username&quot;)))
+    usernameField.sendKeys(&quot;aqif_m_con@vnshealthhub.org.fullsbx&quot;)
+    WDS.browser.findElement(By.id(&quot;password&quot;)).sendKeys(&quot;VNSHealth@1&quot;)
+    WDS.browser.findElement(By.id(&quot;Login&quot;)).click()
+    WDS.log.info(&quot;Login form submitted.&quot;)
 
     // --- Step 2: Navigate to Patient Data Tab ---
-    WDS.log.info("Waiting for the Case Record Page to load...")
-    def patientDataTabLocator = By.xpath("//div[contains(@class, 'slds-tabs_card')]//a[@data-label='Patient Data']")
+    WDS.log.info(&quot;Waiting for the Case Record Page to load...&quot;)
+    def patientDataTabLocator = By.xpath(&quot;//div[contains(@class, &apos;slds-tabs_card&apos;)]//a[@data-label=&apos;Patient Data&apos;]&quot;)
     def patientDataTab = wait.until(ExpectedConditions.elementToBeClickable(patientDataTabLocator))
     patientDataTab.click()
-    WDS.log.info("Clicked 'Patient Data' tab.")
+    WDS.log.info(&quot;Clicked &apos;Patient Data&apos; tab.&quot;)
 
     // --- Step 3: Navigate to Authorizations Sub-Tab (using JS Click) ---
-    def authorizationsSubTabLocator = By.xpath("//div[contains(@class, 'slds-tabs_card')]//a[@data-label='Authorizations']")
+    def authorizationsSubTabLocator = By.xpath(&quot;//div[contains(@class, &apos;slds-tabs_card&apos;)]//a[@data-label=&apos;Authorizations&apos;]&quot;)
     def authorizationsSubTab = wait.until(ExpectedConditions.presenceOfElementLocated(authorizationsSubTabLocator))
     
     // *** THE DEFINITIVE FIX: Use a JavaScript click to prevent interception by the utility bar ***
-    js.executeScript("arguments[0].click();", authorizationsSubTab)
-    WDS.log.info("Clicked on 'Authorizations' sub-tab using JavaScript.")
+    js.executeScript(&quot;arguments[0].click();&quot;, authorizationsSubTab)
+    WDS.log.info(&quot;Clicked on &apos;Authorizations&apos; sub-tab using JavaScript.&quot;)
 
     // --- Step 4: Find the button, start the timer, and click (using JS Click) ---
-    def applyFilterButtonLocator = By.xpath("//c-combined-authorization-data-l-w-c//button[text()='Apply Filter']")
+    def applyFilterButtonLocator = By.xpath(&quot;//c-combined-authorization-data-l-w-c//button[text()=&apos;Apply Filter&apos;]&quot;)
     def applyFilterButton = wait.until(ExpectedConditions.presenceOfElementLocated(applyFilterButtonLocator))
     
-    WDS.log.info("Found 'Apply Filter' button. Starting timer and clicking now.")
+    WDS.log.info(&quot;Found &apos;Apply Filter&apos; button. Starting timer and clicking now.&quot;)
     long startTime = System.nanoTime() 
 
     // *** Using a JavaScript click here as well for maximum stability ***
-    js.executeScript("arguments[0].click();", applyFilterButton)
+    js.executeScript(&quot;arguments[0].click();&quot;, applyFilterButton)
     
     // --- Step 5: Wait for data to appear and stop the timer ---
-    def dataRowLocator = By.xpath("//lightning-datatable//tbody/tr[1]")
+    def dataRowLocator = By.xpath(&quot;//lightning-datatable//tbody/tr[1]&quot;)
     wait.until(ExpectedConditions.visibilityOfElementLocated(dataRowLocator))
     
     long endTime = System.nanoTime()
-    WDS.log.info("First row of data has appeared. Stopping timer.")
+    WDS.log.info(&quot;First row of data has appeared. Stopping timer.&quot;)
     
     // --- Step 6: Calculate and report the time ---
     long durationNanos = endTime - startTime
     long durationMicros = durationNanos / 1000
     
-    WDS.log.info("------------------------------------------------------")
-    WDS.log.info("Data load time after filter: " + durationMicros + " microseconds.")
-    WDS.log.info("------------------------------------------------------")
+    WDS.log.info(&quot;------------------------------------------------------&quot;)
+    WDS.log.info(&quot;Data load time after filter: &quot; + durationMicros + &quot; microseconds.&quot;)
+    WDS.log.info(&quot;------------------------------------------------------&quot;)
 
-    WDS.vars.put("dataLoadTimeMicros", String.valueOf(durationMicros))
+    WDS.vars.put(&quot;dataLoadTimeMicros&quot;, String.valueOf(durationMicros))
     
     WDS.sampleResult.setSuccessful(true)
-    WDS.sampleResult.setResponseMessage("Data loaded successfully in " + durationMicros + " microseconds.")
+    WDS.sampleResult.setResponseMessage(&quot;Data loaded successfully in &quot; + durationMicros + &quot; microseconds.&quot;)
     
 } catch (Exception e) {
-    WDS.log.error("Script failed: " + e.getMessage(), e)
+    WDS.log.error(&quot;Script failed: &quot; + e.getMessage(), e)
     WDS.sampleResult.setSuccessful(false)
-    WDS.sampleResult.setResponseMessage("Failure: " + e.getMessage())
-}
+    WDS.sampleResult.setResponseMessage(&quot;Failure: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="WebDriverSampler.parameters"></stringProp>
+          <stringProp name="WebDriverSampler.language">groovy</stringProp>
+        </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
+        <hashTree/>
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="SalesForce Load V2">
+          <stringProp name="WebDriverSampler.script">// FINAL ROBUST SCRIPT - Correctly uses JavaScript clicks to bypass ALL UI interception issues.
+
+WDS.log.info(&quot;Starting Salesforce Test Sampler&quot;)
+
+// Import necessary classes
+import org.openqa.selenium.By
+import org.openqa.selenium.JavascriptExecutor
+import org.openqa.selenium.support.ui.WebDriverWait
+import org.openqa.selenium.support.ui.ExpectedConditions
+import java.time.Duration
+
+// A generous 120-second timeout for the sandbox environment.
+def wait = new WebDriverWait(WDS.browser, Duration.ofSeconds(120))
+// Create a JavascriptExecutor instance to be reused
+JavascriptExecutor js = (JavascriptExecutor) WDS.browser
+
+try {
+    // --- Step 1: Navigate and Login ---
+    WDS.browser.get(&quot;https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/&quot;)
+    WDS.log.info(&quot;Navigated to Salesforce URL.&quot;)
+    
+    def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(&quot;username&quot;)))
+    usernameField.sendKeys(&quot;aqif_m_con@vnshealthhub.org.fullsbx&quot;)
+    WDS.browser.findElement(By.id(&quot;password&quot;)).sendKeys(&quot;VNSHealth@1&quot;)
+    WDS.browser.findElement(By.id(&quot;Login&quot;)).click()
+    WDS.log.info(&quot;Login form submitted.&quot;)
+
+    // --- Step 2: Navigate to Patient Data Tab ---
+    WDS.log.info(&quot;Waiting for the Case Record Page to load...&quot;)
+    def patientDataTabLocator = By.xpath(&quot;//div[contains(@class, &apos;slds-tabs_card&apos;)]//a[@data-label=&apos;Patient Data&apos;]&quot;)
+    def patientDataTab = wait.until(ExpectedConditions.elementToBeClickable(patientDataTabLocator))
+    patientDataTab.click()
+    WDS.log.info(&quot;Clicked &apos;Patient Data&apos; tab.&quot;)
+
+    // --- Step 3: Navigate to Authorizations Sub-Tab (using JS Click) ---
+    def authorizationsSubTabLocator = By.xpath(&quot;//div[contains(@class, &apos;slds-tabs_card&apos;)]//a[@data-label=&apos;Authorizations&apos;]&quot;)
+    def authorizationsSubTab = wait.until(ExpectedConditions.presenceOfElementLocated(authorizationsSubTabLocator))
+    
+    // *** THE DEFINITIVE FIX: Use a JavaScript click to prevent interception by the utility bar ***
+    js.executeScript(&quot;arguments[0].click();&quot;, authorizationsSubTab)
+    WDS.log.info(&quot;Clicked on &apos;Authorizations&apos; sub-tab using JavaScript.&quot;)
+
+    // --- Step 4: Find the button, start the timer, and click (using JS Click) ---
+    def applyFilterButtonLocator = By.xpath(&quot;//c-combined-authorization-data-l-w-c//button[text()=&apos;Apply Filter&apos;]&quot;)
+    def applyFilterButton = wait.until(ExpectedConditions.presenceOfElementLocated(applyFilterButtonLocator))
+    
+    WDS.log.info(&quot;Found &apos;Apply Filter&apos; button. Starting timer and clicking now.&quot;)
+    long startTime = System.nanoTime() 
+
+    // *** Using a JavaScript click here as well for maximum stability ***
+    js.executeScript(&quot;arguments[0].click();&quot;, applyFilterButton)
+    
+    // --- Step 5: Wait for data to appear and stop the timer ---
+    def dataRowLocator = By.xpath(&quot;//lightning-datatable//tbody/tr[1]&quot;)
+    wait.until(ExpectedConditions.visibilityOfElementLocated(dataRowLocator))
+    
+    long endTime = System.nanoTime()
+    WDS.log.info(&quot;First row of data has appeared. Stopping timer.&quot;)
+    
+    // --- Step 6: Calculate and report the time ---
+    long durationNanos = endTime - startTime
+    long durationMicros = durationNanos / 1000
+    
+    WDS.log.info(&quot;------------------------------------------------------&quot;)
+    WDS.log.info(&quot;Data load time after filter: &quot; + durationMicros + &quot; microseconds.&quot;)
+    WDS.log.info(&quot;------------------------------------------------------&quot;)
+
+    WDS.vars.put(&quot;dataLoadTimeMicros&quot;, String.valueOf(durationMicros))
+    
+    WDS.sampleResult.setSuccessful(true)
+    WDS.sampleResult.setResponseMessage(&quot;Data loaded successfully in &quot; + durationMicros + &quot; microseconds.&quot;)
+    
+} catch (Exception e) {
+    WDS.log.error(&quot;Script failed: &quot; + e.getMessage(), e)
+    WDS.sampleResult.setSuccessful(false)
+    WDS.sampleResult.setResponseMessage(&quot;Failure: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="WebDriverSampler.parameters"></stringProp>
+          <stringProp name="WebDriverSampler.language">groovy</stringProp>
+        </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
