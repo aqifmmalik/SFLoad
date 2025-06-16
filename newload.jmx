@@ -1,159 +1,98 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
-  <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Salesforce UI Login Test" enabled="true">
-      <stringProp name="TestPlan.comments">Salesforce Login Test using WebDriver Sampler</stringProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
-      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-        <collectionProp name="Arguments.arguments"/>
-      </elementProp>
-      <stringProp name="TestPlan.user_define_classpath"></stringProp>
-    </TestPlan>
-    <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Salesforce Login Users" enabled="true">
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-          <stringProp name="LoopController.loops">1</stringProp>
-          <boolProp name="LoopController.continue_forever">false</boolProp>
-        </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
-        <boolProp name="ThreadGroup.scheduler">false</boolProp>
-        <stringProp name="ThreadGroup.duration"></stringProp>
-        <stringProp name="ThreadGroup.delay"></stringProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
-      </ThreadGroup>
-      <hashTree>
-        <ChromeConfig guiclass="ChromeConfigGui" testclass="ChromeConfig" testname="jp@gc - Chrome Driver Config" enabled="true">
-          <stringProp name="WebDriverConfig.chromedriver_path"></stringProp>
-          <boolProp name="WebDriverConfig.chrome_headless">false</boolProp>
-          <stringProp name="WebDriverConfig.proxy_type">NO_PROXY</stringProp>
-          <stringProp name="WebDriverConfig.proxy_host"></stringProp>
-          <stringProp name="WebDriverConfig.proxy_port"></stringProp>
-          <stringProp name="WebDriverConfig.proxy_user"></stringProp>
-          <stringProp name="WebDriverConfig.proxy_pass"></stringProp>
-          <stringProp name="WebDriverConfig.acceptinsecurecerts">false</stringProp>
-          <stringProp name="WebDriverConfig.capabilities"></stringProp>
-          <stringProp name="WebDriverConfig.chrome_additional_options">
-            --remote-allow-origins=*
-          </stringProp>
-          <stringProp name="WebDriverConfig.binary_path"></stringProp>
-          <boolProp name="WebDriverConfig.webdrivermanager_autoinstall">true</boolProp>
-        </ChromeConfig>
-        <hashTree/>
-        <WebDriverSampler guiclass="WebDriverSamplerGui" testclass="WebDriverSampler" testname="Salesforce Login Flow" enabled="true">
-          <stringProp name="WebDriverSampler.script">
-            // Import necessary Selenium classes
-            import org.openqa.selenium.By
-            import org.openqa.selenium.support.ui.WebDriverWait
-            import org.openqa.selenium.support.ui.ExpectedConditions
-            import org.openqa.selenium.Dimension // For setting window size
-            import java.time.Duration // For WebDriverWait timeout
+// Use WDS (WebDriverSampler) variables for proper JMeter integration.
+// WDS.sampleResult: Use to mark the sampler as passed or failed.
+// WDS.log: Use to write messages to the jmeter.log file.
+// WDS.browser: This is the WebDriver instance managed by the Chrome Driver Config.
 
-            // --- Configuration Variables ---
-            def baseUrl = "https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/"
-            def username = "testuser@vnshealthhub.org.fullsbx"
-            def password = "testpassword"
-            // XPath for post-login verification on Lightning homepage
-            def postLoginElementXPath = "//*[@id=\"oneHeader\"]/div[2]/div[2]/div/button" 
-            def timeoutSeconds = 30 // Max wait time for elements (adjust if network is slow)
+// --- Step 1: Start the Sampler and Open URL ---
+// This command starts the timer for the sampler.
+WDS.sampleResult.sampleStart()
+WDS.log.info("Starting Login Sampler")
 
-            // Window size for "80% zoom" effect (80% of 1920x1080)
-            def windowWidth = 1536
-            def windowHeight = 864
+// The browser is already opened by the Chrome Driver Config.
+// We just need to navigate to the URL.
+WDS.browser.get("https://test-crm--fullsbx.sandbox.my.salesforce.com/")
+WDS.log.info("Navigated to Salesforce URL.")
 
-            log.info("Starting Salesforce Login Script for user: ${username}")
+// Import necessary classes
+import org.openqa.selenium.By
+import org.openqa.selenium.support.ui.WebDriverWait
+import org.openqa.selenium.support.ui.ExpectedConditions
+import java.time.Duration
 
-            try {
-                // 1. Navigate to Salesforce Login URL
-                log.info("Navigating to URL: ${baseUrl}")
-                WDS.sampleResult.sampleStart() // Start measuring overall login time
-                WDS.browser.get(baseUrl)
-                
-                // Set browser window size
-                WDS.browser.manage().window().setSize(new Dimension(windowWidth, windowHeight))
-                log.info("Browser window set to size: ${windowWidth}x${windowHeight}")
+// Create a wait object to be reused throughout the script. 30 seconds is a reasonable timeout.
+def wait = new WebDriverWait(WDS.browser, Duration.ofSeconds(30))
 
-                // Initialize WebDriverWait for explicit waits
-                def wait = new WebDriverWait(WDS.browser, Duration.ofSeconds(timeoutSeconds))
+try {
+    // --- Step 2: Login ---
+    WDS.log.info("Attempting to log in...")
+    
+    // Wait for username field to be visible before interacting
+    def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")))
+    usernameField.sendKeys("testuser_m_con@testhub.org.fullsbx")
+    
+    // No need to wait for password field, it's already loaded
+    WDS.browser.findElement(By.id("password")).sendKeys("test@1")
+    WDS.browser.findElement(By.id("Login")).click()
+    WDS.log.info("Login form submitted.")
 
-                // 2. Enter Username
-                log.info("Waiting for username field (ID: username)...")
-                def usernameField = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("username")))
-                usernameField.sendKeys(username)
-                log.info("Username entered.")
+    // --- Step 3: Navigate to Authorizations ---
+    // Instead of Thread.sleep(), wait for a known element on the next page.
+    // Let's wait for the "Patient Data" tab to be clickable.
+    def patientDataTab = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a/span[text()='Patient Data']")))
+    patientDataTab.click()
+    WDS.log.info("Clicked on 'Patient Data' tab.")
 
-                // 3. Enter Password
-                log.info("Waiting for password field (ID: password)...")
-                def passwordField = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("password")))
-                passwordField.sendKeys(password)
-                log.info("Password entered.")
+    // Now wait for the "Authorizations" tab to be clickable
+    def authorizationsTab = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a/span[text()='Authorizations']")))
+    authorizationsTab.click()
+    WDS.log.info("Clicked on 'Authorizations' tab.")
 
-                // 4. Click Login Button
-                log.info("Waiting for login button (ID: Login) to be clickable...")
-                def loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("Login")))
-                loginButton.click()
-                log.info("Login button clicked. Waiting for next page...")
+    // --- Step 4: Interact with Elements on the Authorizations Page ---
+    // Wait for the page content to load by waiting for a table or a known container.
+    // NOTE: The locator "(//button[@type='button'])[50]" is very unstable.
+    // You should find a more reliable locator, like one with a unique ID, name, or data-test-id attribute.
+    // For this example, we will proceed but this is a major risk for script failure.
+    def specificButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//button[@type='button'])[50]")))
+    specificButton.click()
+    WDS.log.info("Clicked on the specific button.")
 
-                // 5. Post-Login Verification (Wait for element on the Lightning homepage)
-                log.info("Waiting for post-login verification element (XPath: ${postLoginElementXPath}).")
-                def postLoginElement = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(postLoginElementXPath)))
-                
-                // Check if element is displayed and enabled
-                if (postLoginElement.isDisplayed() && postLoginElement.isEnabled()) {
-                    log.info("Successfully landed on Lightning homepage (verification element found and interactive).")
-                    WDS.sampleResult.setResponseMessage("Login Successful")
-                    WDS.sampleResult.setResponseCode("200")
-                    WDS.sampleResult.setSuccessful(true)
-                } else {
-                    throw new Exception("Post-login element found but not interactive.")
-                }
+    // --- Step 5: Assert Element is Visible and Measure Load Time ---
+    // Record start time for this specific measurement
+    long loadTimeStart = System.currentTimeMillis()
+    WDS.log.info("Starting final element visibility check...")
+    
+    // The XPath you provided is very long and fragile. If possible, shorten it.
+    def finalElementLocator = By.xpath("//flexipage-tab2[@id='tab-10']//lightning-datatable//tbody/tr[1]/th/lightning-primitive-cell-factory/span")
+    
+    // Wait for the final element to be visible
+    wait.until(ExpectedConditions.visibilityOfElementLocated(finalElementLocator))
+    
+    // If the line above doesn't throw a TimeoutException, the element was found.
+    long loadTimeEnd = System.currentTimeMillis()
+    long loadTime = loadTimeEnd - loadTimeStart
+    
+    WDS.log.info("SUCCESS: Final element was found and is visible.")
+    WDS.log.info("Element load time: " + loadTime + " ms.")
+    
+    // You can store the load time as a custom variable if needed for reports
+    vars.put("elementLoadTime", String.valueOf(loadTime))
 
-            } catch (Exception e) {
-                log.error("Salesforce Login Failed: " + e.getMessage(), e) // Log exception stack trace
-                WDS.sampleResult.setResponseMessage("Login Failed: " + e.getMessage())
-                WDS.sampleResult.setResponseCode("500")
-                WDS.sampleResult.setSuccessful(false)
-            } finally {
-                WDS.sampleResult.sampleEnd() // End measuring overall login time
-                log.info("Salesforce Login Script Finished for user: ${username}")
-            }
-          </stringProp>
-        </WebDriverSampler>
-        <hashTree/>
-        <ResultCollector guiclass="ViewResultsTreeGui" testclass="ResultCollector" testname="View Results Tree" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
-          <objProp>
-            <name>saveConfig</name>
-            <value class="SampleSaveConfiguration">
-              <time>true</time>
-              <latency>true</latency>
-              <timestamp>true</timestamp>
-              <success>true</success>
-              <label>true</label>
-              <code>true</code>
-              <message>true</message>
-              <threadName>true</threadName>
-              <dataType>true</dataType>
-              <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <v>true</v>
-              <default_encoding></default_encoding>
-              <url>true</url>
-              <fileName>false</fileName>
-              <hostname>true</hostname>
-              <port>true</port>
-              <connectTime>true</connectTime>
-            </value>
-          </objProp>
-          <stringProp name="filename"></stringProp>
-        </ResultCollector>
-        <hashTree/>
-      </hashTree>
-    </hashTree>
-</jmeterTestPlan>
+    // Mark the Sampler as successful
+    WDS.sampleResult.setSuccessful(true)
+    WDS.sampleResult.setResponseMessage("Successfully logged in and verified element.")
+    
+} catch (Exception e) {
+    // If any 'wait' fails or any other exception occurs, this block will execute.
+    WDS.log.error("Script failed: " + e.getMessage())
+    
+    // Mark the Sampler as failed
+    WDS.sampleResult.setSuccessful(false)
+    WDS.sampleResult.setResponseMessage("Failure: " + e.getMessage())
+} finally {
+    // This command stops the timer for the sampler.
+    // It's crucial to put this in a 'finally' block to ensure it always runs.
+    WDS.sampleResult.sampleEnd()
+
+    // DO NOT call WDS.browser.quit() here.
+    // The Chrome Driver Config will handle closing the browser at the end of the thread's iteration.
+}
