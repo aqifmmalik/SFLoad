@@ -1,13 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Salesforce WebDriver Test Plan">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Salesforce WebDriver Test Plan (WebDriverManager)">
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Salesforce User">
+      <setUpThreadGroup guiclass="SetupThreadGroupGui" testclass="setUpThreadGroup" testname="Setup - Download Driver">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <longProp name="ThreadGroup.start_time">1715878235000</longProp>
+        <longProp name="ThreadGroup.end_time">1715878235000</longProp>
+        <longProp name="ThreadGroup.duration">0</longProp>
+        <longProp name="ThreadGroup.delay">0</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">stoptest</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </setUpThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Download ChromeDriver using WebDriverManager">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import io.github.bonigarcia.wdm.WebDriverManager;
+
+// This code will run BEFORE the main thread group.
+// It downloads the correct chromedriver and sets the required system property.
+log.info("WebDriverManager is setting up the ChromeDriver...");
+WebDriverManager.chromedriver().setup();
+log.info("WebDriverManager has completed setup for chromedriver. Path is: " + System.getProperty("webdriver.chrome.driver"));</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Business Flow - Salesforce User">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -21,7 +51,7 @@
         <com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig guiclass="com.googlecode.jmeter.plugins.webdriver.config.gui.ChromeDriverConfigGui" testclass="com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig" testname="jp@gc - Chrome Driver Config">
           <boolProp name="WebDriverConfig.acceptinsecurecerts">false</boolProp>
           <boolProp name="WebDriverConfig.reset_per_iteration">false</boolProp>
-          <stringProp name="WebDriverConfig.driver_path">C:\JMeter-Drivers\chromedriver.exe</stringProp>
+          <stringProp name="WebDriverConfig.driver_path"></stringProp>
           <boolProp name="WebDriverConfig.dev_mode">false</boolProp>
           <boolProp name="WebDriverConfig.headless">false</boolProp>
           <boolProp name="WebDriverConfig.maximize_browser">true</boolProp>
@@ -37,7 +67,7 @@
           <stringProp name="WebDriverConfig.no_proxy"></stringProp>
         </com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig>
         <hashTree/>
-        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="1. Login and Navigate to Authorizations">
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="Login and Navigate to Authorizations">
           <stringProp name="WebDriverSampler.script">// Use WDS (WebDriverSampler) variables for proper JMeter integration.
 // WDS.sampleResult: Use to mark the sampler as passed or failed.
 // WDS.log: Use to write messages to the jmeter.log file.
@@ -119,10 +149,6 @@ try {
     // Mark the Sampler as failed
     WDS.sampleResult.setSuccessful(false)
     WDS.sampleResult.setResponseMessage("Failure: " + e.getMessage())
-    // Optionally, capture a screenshot on failure
-    // def screenshot = WDS.browser.getScreenshotAs(org.openqa.selenium.OutputType.BYTES)
-    // WDS.sampleResult.setResponseData(screenshot)
-    // WDS.sampleResult.setDataType(org.apache.jmeter.samplers.SampleResult.BINARY)
     
 } finally {
     // This command stops the timer for the sampler.
