@@ -1,0 +1,77 @@
+// FINAL ROBUST SCRIPT - Correctly uses JavaScript clicks to bypass ALL UI interception issues.
+
+WDS.log.info("Starting Salesforce Test Sampler")
+
+// Import necessary classes
+import org.openqa.selenium.By
+import org.openqa.selenium.JavascriptExecutor
+import org.openqa.selenium.support.ui.WebDriverWait
+import org.openqa.selenium.support.ui.ExpectedConditions
+import java.time.Duration
+
+// A generous 120-second timeout for the sandbox environment.
+def wait = new WebDriverWait(WDS.browser, Duration.ofSeconds(120))
+// Create a JavascriptExecutor instance to be reused
+JavascriptExecutor js = (JavascriptExecutor) WDS.browser
+
+try {
+    // --- Step 1: Navigate and Login ---
+    WDS.browser.get("https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/")
+    WDS.log.info("Navigated to Salesforce URL.")
+    
+    def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")))
+    usernameField.sendKeys("aqif_m_con@vnshealthhub.org.fullsbx")
+    WDS.browser.findElement(By.id("password")).sendKeys("VNSHealth@1")
+    WDS.browser.findElement(By.id("Login")).click()
+    WDS.log.info("Login form submitted.")
+
+    // --- Step 2: Navigate to Patient Data Tab ---
+    WDS.log.info("Waiting for the Case Record Page to load...")
+    def patientDataTabLocator = By.xpath("//div[contains(@class, 'slds-tabs_card')]//a[@data-label='Patient Data']")
+    def patientDataTab = wait.until(ExpectedConditions.elementToBeClickable(patientDataTabLocator))
+    patientDataTab.click()
+    WDS.log.info("Clicked 'Patient Data' tab.")
+
+    // --- Step 3: Navigate to Authorizations Sub-Tab (using JS Click) ---
+    def authorizationsSubTabLocator = By.xpath("//div[contains(@class, 'slds-tabs_card')]//a[@data-label='Authorizations']")
+    def authorizationsSubTab = wait.until(ExpectedConditions.presenceOfElementLocated(authorizationsSubTabLocator))
+    
+    // *** THE DEFINITIVE FIX: Use a JavaScript click to prevent interception by the utility bar ***
+    js.executeScript("arguments[0].click();", authorizationsSubTab)
+    WDS.log.info("Clicked on 'Authorizations' sub-tab using JavaScript.")
+
+    // --- Step 4: Find the button, start the timer, and click (using JS Click) ---
+    def applyFilterButtonLocator = By.xpath("//c-combined-authorization-data-l-w-c//button[text()='Apply Filter']")
+    def applyFilterButton = wait.until(ExpectedConditions.presenceOfElementLocated(applyFilterButtonLocator))
+    
+    WDS.log.info("Found 'Apply Filter' button. Starting timer and clicking now.")
+    long startTime = System.nanoTime() 
+
+    // *** Using a JavaScript click here as well for maximum stability ***
+    js.executeScript("arguments[0].click();", applyFilterButton)
+    
+    // --- Step 5: Wait for data to appear and stop the timer ---
+    def dataRowLocator = By.xpath("//lightning-datatable//tbody/tr[1]")
+    wait.until(ExpectedConditions.visibilityOfElementLocated(dataRowLocator))
+    
+    long endTime = System.nanoTime()
+    WDS.log.info("First row of data has appeared. Stopping timer.")
+    
+    // --- Step 6: Calculate and report the time ---
+    long durationNanos = endTime - startTime
+    long durationMicros = durationNanos / 1000
+    
+    WDS.log.info("------------------------------------------------------")
+    WDS.log.info("Data load time after filter: " + durationMicros + " microseconds.")
+    WDS.log.info("------------------------------------------------------")
+
+    WDS.vars.put("dataLoadTimeMicros", String.valueOf(durationMicros))
+    
+    WDS.sampleResult.setSuccessful(true)
+    WDS.sampleResult.setResponseMessage("Data loaded successfully in " + durationMicros + " microseconds.")
+    
+} catch (Exception e) {
+    WDS.log.error("Script failed: " + e.getMessage(), e)
+    WDS.sampleResult.setSuccessful(false)
+    WDS.sampleResult.setResponseMessage("Failure: " + e.getMessage())
+}
