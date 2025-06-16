@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Salesforce WebDriver Test Plan">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Salesforce User">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig guiclass="com.googlecode.jmeter.plugins.webdriver.config.gui.ChromeDriverConfigGui" testclass="com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig" testname="jp@gc - Chrome Driver Config">
+          <boolProp name="WebDriverConfig.acceptinsecurecerts">false</boolProp>
+          <boolProp name="WebDriverConfig.reset_per_iteration">false</boolProp>
+          <stringProp name="WebDriverConfig.driver_path">C:\JMeter-Drivers\chromedriver.exe</stringProp>
+          <boolProp name="WebDriverConfig.dev_mode">false</boolProp>
+          <boolProp name="WebDriverConfig.headless">false</boolProp>
+          <boolProp name="WebDriverConfig.maximize_browser">true</boolProp>
+          <stringProp name="ChromeDriverConfig.additional_args"></stringProp>
+          <stringProp name="ChromeDriverConfig.binary_path"></stringProp>
+          <stringProp name="WebDriverConfig.proxy_type">SYSTEM</stringProp>
+          <stringProp name="WebDriverConfig.proxy_pac_url"></stringProp>
+          <stringProp name="WebDriverConfig.http_host"></stringProp>
+          <intProp name="WebDriverConfig.http_port">8080</intProp>
+          <boolProp name="WebDriverConfig.use_http_for_all_protocols">true</boolProp>
+          <stringProp name="WebDriverConfig.https_host"></stringProp>
+          <intProp name="WebDriverConfig.https_port">8080</intProp>
+          <stringProp name="WebDriverConfig.no_proxy"></stringProp>
+        </com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig>
+        <hashTree/>
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="1. Login and Navigate to Authorizations">
+          <stringProp name="WebDriverSampler.script">// Use WDS (WebDriverSampler) variables for proper JMeter integration.
+// WDS.sampleResult: Use to mark the sampler as passed or failed.
+// WDS.log: Use to write messages to the jmeter.log file.
+// WDS.browser: This is the WebDriver instance managed by the Chrome Driver Config.
+
+// --- Start the Sampler and Open URL ---
+// This command starts the timer for the sampler.
+WDS.sampleResult.sampleStart()
+WDS.log.info("Starting Salesforce Test Sampler")
+
+// The browser is already opened by the Chrome Driver Config.
+// We just need to navigate to the URL.
+WDS.browser.get("https://test-crm--fullsbx.sandbox.my.salesforce.com/")
+WDS.log.info("Navigated to Salesforce URL.")
+
+// Import necessary classes
+import org.openqa.selenium.By
+import org.openqa.selenium.support.ui.WebDriverWait
+import org.openqa.selenium.support.ui.ExpectedConditions
+import java.time.Duration
+
+// Create a wait object to be reused throughout the script. 30 seconds is a reasonable timeout.
+def wait = new WebDriverWait(WDS.browser, Duration.ofSeconds(30))
+
+try {
+    // --- Step 2: Login ---
+    WDS.log.info("Attempting to log in...")
+    
+    // Wait for username field to be visible before interacting
+    def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")))
+    usernameField.sendKeys("testuser_m_con@testhub.org.fullsbx")
+    
+    // No need to wait for password field, it's already loaded
+    WDS.browser.findElement(By.id("password")).sendKeys("test@1")
+    WDS.browser.findElement(By.id("Login")).click()
+    WDS.log.info("Login form submitted.")
+
+    // --- Step 3: Navigate to Authorizations ---
+    // Instead of Thread.sleep(), wait for a known element on the next page.
+    // Let's wait for the "Patient Data" tab to be clickable.
+    // A better XPath looks for the span text inside the anchor tag.
+    def patientDataTab = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a/span[text()='Patient Data']")))
+    patientDataTab.click()
+    WDS.log.info("Clicked on 'Patient Data' tab.")
+
+    // Now wait for the "Authorizations" tab to be clickable
+    def authorizationsTab = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a/span[text()='Authorizations']")))
+    authorizationsTab.click()
+    WDS.log.info("Clicked on 'Authorizations' tab.")
+
+    // --- Step 4: Interact with Elements on the Authorizations Page ---
+    // Wait for the page content to load by waiting for a table or a known container.
+    // WARNING: The locator "(//button[@type='button'])[50]" is extremely unstable and likely to break.
+    // You should find a more reliable locator, like one with a unique ID, name, or data-test-id attribute.
+    def specificButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//button[@type='button'])[50]")))
+    specificButton.click()
+    WDS.log.info("Clicked on the specific button.")
+
+    // --- Step 5: Assert Element is Visible ---
+    WDS.log.info("Starting final element visibility check...")
+    
+    // The XPath you provided is very long and fragile. This is a slightly more robust version.
+    def finalElementLocator = By.xpath("//flexipage-tab2[@id='tab-10']//lightning-datatable//tbody/tr[1]/th/lightning-primitive-cell-factory/span")
+    
+    // Wait for the final element to be visible. If this fails, it will throw a TimeoutException and be caught by the catch block.
+    wait.until(ExpectedConditions.visibilityOfElementLocated(finalElementLocator))
+    
+    // If the line above doesn't throw an exception, the element was found.
+    WDS.log.info("SUCCESS: Final element was found and is visible.")
+    
+    // Mark the Sampler as successful
+    WDS.sampleResult.setSuccessful(true)
+    WDS.sampleResult.setResponseMessage("Successfully logged in and verified element visibility.")
+    
+} catch (Exception e) {
+    // If any 'wait' fails or any other exception occurs, this block will execute.
+    WDS.log.error("Script failed: " + e.getMessage())
+    
+    // Mark the Sampler as failed
+    WDS.sampleResult.setSuccessful(false)
+    WDS.sampleResult.setResponseMessage("Failure: " + e.getMessage())
+    // Optionally, capture a screenshot on failure
+    // def screenshot = WDS.browser.getScreenshotAs(org.openqa.selenium.OutputType.BYTES)
+    // WDS.sampleResult.setResponseData(screenshot)
+    // WDS.sampleResult.setDataType(org.apache.jmeter.samplers.SampleResult.BINARY)
+    
+} finally {
+    // This command stops the timer for the sampler.
+    // It's crucial to put this in a 'finally' block to ensure it always runs.
+    WDS.sampleResult.sampleEnd()
+
+    // DO NOT call WDS.browser.quit() here.
+    // The Chrome Driver Config handles closing the browser at the end of the thread's iteration.
+}
+</stringProp>
+          <stringProp name="WebDriverSampler.parameters"></stringProp>
+          <stringProp name="WebDriverSampler.language">groovy</stringProp>
+        </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
