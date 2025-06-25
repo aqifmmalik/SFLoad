@@ -85,11 +85,11 @@ def takeScreenshot(label) {
 
 try {
     def wait = new WebDriverWait(WDS.browser, Duration.ofSeconds(120))
-    WDS.browser.get(&quot;https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/&quot;)
+    WDS.browser.get(&quot;https://testhealth-crm--fullsbx.sandbox.my.salesforce.com/&quot;)
     WDS.log.info(&quot;Navigated to Salesforce URL.&quot;)
     def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(&quot;username&quot;)))
-    usernameField.sendKeys(&quot;aqif_m_con@vnshealthhub.org.fullsbx&quot;)
-    WDS.browser.findElement(By.id(&quot;password&quot;)).sendKeys(&quot;VNSHealth@1&quot;)
+    usernameField.sendKeys(&quot;aqif_m_con@testhealthhub.org.fullsbx&quot;)
+    WDS.browser.findElement(By.id(&quot;password&quot;)).sendKeys(&quot;testHealth@1&quot;)
     WDS.browser.findElement(By.id(&quot;Login&quot;)).click()
     WDS.log.info(&quot;Login form submitted.&quot;)
     WDS.log.info(&quot;Waiting for the Case Record Page to load...&quot;)
@@ -391,12 +391,12 @@ JavascriptExecutor js = (JavascriptExecutor) WDS.browser
 
 try {
     // --- Step 1: Navigate and Login ---
-    WDS.browser.get(&quot;https://vnshealth-crm--fullsbx.sandbox.my.salesforce.com/&quot;)
+    WDS.browser.get(&quot;https://testhealth-crm--fullsbx.sandbox.my.salesforce.com/&quot;)
     WDS.log.info(&quot;Navigated to Salesforce URL.&quot;)
     
     def usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(&quot;username&quot;)))
-    usernameField.sendKeys(&quot;aqif_m_con@vnshealthhub.org.fullsbx&quot;)
-    WDS.browser.findElement(By.id(&quot;password&quot;)).sendKeys(&quot;VNSHealth@1&quot;)
+    usernameField.sendKeys(&quot;aqif_m_con@testhealthhub.org.fullsbx&quot;)
+    WDS.browser.findElement(By.id(&quot;password&quot;)).sendKeys(&quot;testHealth@1&quot;)
     WDS.browser.findElement(By.id(&quot;Login&quot;)).click()
     WDS.log.info(&quot;Login form submitted.&quot;)
 
